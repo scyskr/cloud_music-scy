@@ -1,0 +1,15 @@
+.text {
+    font-size: 14px;
+  }
+  .item {
+    padding: 8px 0;
+  }
+  .item:hover{
+      background-color: rgb(229, 227, 227);
+  }
+  .box-card {
+    width: 480px;
+  }
+  .el-card__body{
+      padding: 0;
+  }
