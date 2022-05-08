@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="recommenindex">
 <el-carousel :interval="4000" type="card" height="200px">
     <el-carousel-item v-for="item in banners" :key="item.id">
       <h3 class="medium"><img :src="item.imageUrl" alt=""></h3>
@@ -10,7 +10,10 @@
    <div class="recommendThePlaylistheader">推荐歌单 <i class="icon-arrow-right-bold iconfont "></i></div> 
     <div class="recommendedHome" >
         <div class="recommendedItme" >
-        <div class="iteminfo" v-for="(items,id) in reslut" :key="id" @click="btnplaylist(items.id)"><img :src="items.coverImgUrl" alt=""><span>{{items.name}}</span></div>
+        <div class="iteminfo" v-for="(items,id) in reslut" :key="id" @click="btnplaylist(items.id)">
+          <div><img :src="items.picUrl" alt=""></div>
+          <div><span>{{items.name}}</span></div></div>
+      
         </div>
     </div>
 </div>  
@@ -18,16 +21,16 @@
    <div class="popularPodcasts">
          <div class="recommendThePlaylistheader">热门播客 <i class="icon-arrow-right-bold iconfont "></i></div> 
          <div class="popularPodcastsItem">
-             <div class="popularPodcastsIteminfo" v-for="(item,id) in reslut " :key="id" >
+             <div class="popularPodcastsIteminfo" v-for="(item,id) in resluting " :key="id" >
                  <div class="lazyimg" > 
-                      <img  v-lazy="item.coverImgUrl" alt="">
+                      <img  v-lazy="item.picUrl" alt="">
                   </div>
                   <div class="lazyright">
-                     <div class="lazytitle">{{item.name}}</div>
-                     <div class="lazycontent">{{item.alg}}</div>
-                     <div class="lazybotton"><span>一直好听的歌</span>
+                     <div class="lazytitle">{{item.category}}</div>
+                     <div class="lazycontent">{{item.playCount}}</div>
+                     <div class="lazybotton"><span>{{item.rcmdtext}}</span>
                      <i class="icon-bofang iconfont ">
-                         </i><span>{{item.commentCount}}</span>  <!--toFixed -->
+                         </i><span>{{item.id}}</span>  <!--toFixed -->
                          <i class="icon-shipin iconfont"></i> 
                          <span>0.18</span>
                          </div>
@@ -39,46 +42,51 @@
 </template>
 
 <script>
-import {api,app,banner} from '../../network/app'
+import {djhot,personalized,banner,thePlaylist} from '../../network/app'
 export default {
    name:"recomm",
     data() {
     return {
         reslut:[{}],
-        banners:[{}]
+        banners:[{}],
+        resluting:[]
     }
   },
   methods:{
       btnplaylist(id){
           this.$router.push('/home/playlist/'+id);
          this.$store.commit("updatamusicListId", id);
+              thePlaylist({id:id}).then(res=>{
+          this.$store.commit("updatamusicList",res.data.playlist.tracks);
+        })
          
       }
   }, //mounted 
   created(){
-      //  app({type:7}).then(res=>{
-      //       console.log(res.data);
-      //       this.reslut=res.data
-      //       console.log(this.reslut.data[0].name);
-      //     })
-          api({limit:10}).then(res=>{
-          //  console.log(res.data);
-            const reslutdata=res.data;
-            this.reslut=reslutdata.playlists;
-            //  console.log(reslutdata.playlists[0].coverImgUrl);
-            // console.log(reslutdata.playlists[0].name);
-            // console.log(this.reslut);
-          })
           banner({}).then(res=>{
             // console.log(res);
             this.banners=res.data.banners;
             // console.log( this.banners);
+          })
+             personalized({limit:10}).then(res=>{
+            this.reslut=res.data.result;
+          })
+            djhot({limit:10}).then(res=>{
+                  console.log(res.data.djRadios[0].picUrl);
+                   console.log(res.data.djRadios[0].dj.nickname);
+                     console.log(res.data.djRadios[0].playCount);
+             console.log(res.data.djRadios[0].category);
+         this.resluting=res.data.djRadios;
           })
   },
 }
 
 </script>
 <style>
+.recommenindex{
+  height: 800px;
+  overflow-y: scroll;
+}
 .el-carousel__item h3 {
     color: #475669;
     font-size: 14px;
@@ -134,7 +142,7 @@ export default {
  } 
 
  .iteminfo img{
-    width: 220px;
+    width: 200px;
  }
  .recommendThePlaylistheader{
      color: black;
@@ -142,9 +150,13 @@ export default {
         font-size: 18px;
         padding: 20px 20px 10px 0px;
      }
+     .popularPodcasts{
+       margin-bottom: 100px;
+     }
     .popularPodcastsItem{
         display: grid;
-          grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
+             
     }
     .popularPodcastsItem img{
         width: 150px;

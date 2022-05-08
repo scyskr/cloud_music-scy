@@ -1,8 +1,21 @@
 <template>
-<div>
-  <div class="thesonglist">
+  <div>
+    <div class="onedaytop">
+        <div><img src="../../assets/img/recommendMusic.png" alt=""></div>
+        <div>
+            <div class="onetitle">每日歌曲推荐</div>
+            <div>根据你的音乐口味生成，每天6.00更新</div>
+        </div>
+    </div>
+    <div class="onebutton">
+          <div class="allplay"><i class="iconfont icon-bofang"></i> 播放全部</div>
+          <div class="collectionall"><i class="icon-xihuan iconfont"></i> 收藏全部</div>
+    </div>
+    <!-- 表格 -->
+    <div class="tableone">
+        <div class="thesonglist">
        <el-table
-    :data="playlistChest.tracks"
+    :data="musicListDetailone"
     stripe
     style="width: 100%"
     class="thesong"
@@ -44,20 +57,20 @@
     </el-table-column>
   </el-table>
   </div>
-  <div class="loginmoreAndMore" v-if="$store.state.loginuser==false">登录查看更多</div>
+    </div>
+  
   </div>
 </template>
 
 <script>
-import {musicUrl} from '../../network/app'
+import {handleMusicTime} from '../../plugins/ulits'
+import {onesongs,musicUrl} from '../../network/app'
 export default {
-  name:'thesong',
-  props:{
-    playlistChest:{}
-  },
+name:'oneday',
   data() {
       return {
-      musicListDetail:null
+      musicListDetail:[],
+      musicListDetailone:[]
       }
     },
     methods:{
@@ -69,20 +82,21 @@ export default {
           this.$store.commit("updatemusicId", id.id);
           //更新musciurl
         this.$store.commit("updatemusicurl", res.data.data[0].url);
+         this.$store.commit("updatamusicList", this.musicListDetailone);
       //  console.log(id,'5555555555555');
       });
       
       },
       //点击播放时改变样式
          handleDOM(current, last) {
-            this.musicListDetail =this.playlistChest;
+            this.musicListDetail =this.musicListDetailone;
       if (document.querySelector(".thesonglist")) {
         let tableRows = document
           .querySelector(".thesonglist")
           .querySelectorAll(".el-table__row");
         // // 遍历当前musicList 找到当前播放的index的行进行渲染
       //  console.log(this.musicListDetail,'xxxxxxxx');
-        let index = this.musicListDetail.tracks.findIndex(
+        let index = this.musicListDetail.findIndex(
           (item) => item.id == current
         );
         // console.log(index,'得到的下标');
@@ -102,7 +116,7 @@ export default {
         }
         // 清除上一首的样式
         if (last != -1) {
-          let lastIndex = this.musicListDetail.tracks.findIndex(
+          let lastIndex = this.musicListDetail.findIndex(
             (item) => item.id == last
           );
           if (lastIndex != -1) {
@@ -122,37 +136,52 @@ export default {
       }
     },
     },
-     computed:{
-   },
-   watch:{
+    created(){
+    onesongs().then(res=>{
+        this.musicListDetailone=res.data.data.dailySongs;
+         // 处理时间
+      this.musicListDetailone.forEach((item, index) => {
+        this.musicListDetailone[index].dt = handleMusicTime(item.dt);
+      });
+    })
+    },
+    watch:{
 "$store.state.musicId"(current, last) {
   // console.log(current,last,'这是什么');
       this.handleDOM(current, last);
     },
    },
-    filters:{
-      fl(timer){
-        	let cont=	Math.floor(Math.round(timer/1000)/60);
-				let conts= Math.round(timer/1000)%60;
-        let ti=(cont<10?'0'+cont:cont)+ ':'+ (conts<10?'0'+conts:conts);
-        return ti;
-      }
-    }
-    
 }
 
 </script>
-<style>
-.el-tabs__content .cell{
-  text-align: left;
-  max-width: 300;
-  overflow: hidden;
-  white-space: nowrap;  /* 设置文字在一行显示不能换行） */
-  text-overflow: ellipsis; /* （规定当文本溢出时显示省略符号来代表被修剪的文本）*/
+<style scoped>
+.onedaytop{
+    display: flex;
+    align-items: center;
+    gap: 18px;
 }
-.loginmoreAndMore{
- height: 100px;
- text-align: center;
- padding: 30px;
+.onetitle{
+    font-size: 24px;
+    font-weight: 800;
+}
+.onebutton{
+    display: flex;
+    gap: 24px;
+}
+.onebutton div{
+    padding: 10px;
+    border-radius: 20px;
+    text-align: center;
+    margin-left: 20px;
+}
+.allplay{
+    background-color: #ec4141;
+    color: aliceblue;
+}
+.collectionall{
+    background-color: rgb(240, 238, 238);
+}
+.tableone{
+    margin-top: 20px;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-<div>
-  <div class="thesonglist">
+  <div>
+    <div class="thesonglist">
        <el-table
-    :data="playlistChest.tracks"
+    :data="albumlistson.songs"
     stripe
     style="width: 100%"
     class="thesong"
@@ -49,18 +49,17 @@
 </template>
 
 <script>
-import {musicUrl} from '../../network/app'
+import { handleMusicTime } from "../../plugins/ulits"
+import {album,musicUrl} from '../../network/app'
 export default {
-  name:'thesong',
-  props:{
-    playlistChest:{}
-  },
-  data() {
-      return {
-      musicListDetail:null
+ name:'albumListson',
+  data(){
+      return{
+        albumlistson:[],
+        musicListDetail:[]
       }
-    },
-    methods:{
+  },
+     methods:{
       //点击获取音乐id 并更新vuex的数据
       andclick(id){
           // console.log(id.id,"444");
@@ -68,14 +67,27 @@ export default {
         //更新musciid
           this.$store.commit("updatemusicId", id.id);
           //更新musciurl
+          // console.log(res.data.data[0].url);
         this.$store.commit("updatemusicurl", res.data.data[0].url);
       //  console.log(id,'5555555555555');
       });
       
       },
+     contentOfTheAlbum()
+     {
+      album({id:this.$route.params.id}).then(res=>{
+           res.data.songs.forEach((item, index) => {
+        res.data.songs[index].dt = handleMusicTime(item.dt);
+      });
+        this.albumlistson=res.data;
+        this.$store.commit("updatamusicList", this.albumlistson.songs);
+        this.$store.commit("updataalbumId",this.$route.params.id);
+        
+      })
+     },
       //点击播放时改变样式
          handleDOM(current, last) {
-            this.musicListDetail =this.playlistChest;
+            this.musicListDetail =this.albumlistson;
       if (document.querySelector(".thesonglist")) {
         let tableRows = document
           .querySelector(".thesonglist")
@@ -122,14 +134,6 @@ export default {
       }
     },
     },
-     computed:{
-   },
-   watch:{
-"$store.state.musicId"(current, last) {
-  // console.log(current,last,'这是什么');
-      this.handleDOM(current, last);
-    },
-   },
     filters:{
       fl(timer){
         	let cont=	Math.floor(Math.round(timer/1000)/60);
@@ -137,11 +141,22 @@ export default {
         let ti=(cont<10?'0'+cont:cont)+ ':'+ (conts<10?'0'+conts:conts);
         return ti;
       }
+    },
+   created(){
+  this.contentOfTheAlbum();  
+  },
+   watch:{
+"$store.state.musicId"(current, last) {
+  // console.log(current,last,'这是什么');
+      this.handleDOM(current, last);
+    },
+"$store.state.albumId"(current, last){
+    this.contentOfTheAlbum();
     }
-    
+   },
 }
-
 </script>
+
 <style>
 .el-tabs__content .cell{
   text-align: left;
@@ -155,4 +170,4 @@ export default {
  text-align: center;
  padding: 30px;
 }
-</style>
+</style> 

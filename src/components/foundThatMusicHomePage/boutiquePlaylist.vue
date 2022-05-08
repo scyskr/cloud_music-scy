@@ -3,7 +3,7 @@
     <div class="recommendedHome" >
         <div class="boutitme" >
         <div class="iteminfo" v-for="(itembou,id) in boutiquePlaylist" 
-        :key="id"><img v-lazy="itembou.coverImgUrl" alt="">
+        :key="id" @click="recommendedHometui(itembou.id)"><img v-lazy="itembou.coverImgUrl" alt="">
         <span>{{itembou.name}}</span></div>
         </div>
     </div>
@@ -14,13 +14,19 @@
 import {boutiquePlaylist} from '../../network/app'
 export default {
   name:"boutique",
-  props:['name'],  
+  props:['name',"currpage"],  
   data(){
       return{
     //接收精品歌单
     boutiquePlaylist:[],
     // sss:$store.state.loginuser
       }
+  },
+  methods:{
+ recommendedHometui(id){
+ 
+      this.$router.push("/home/playlist/"+id);
+ }
   },
   created(){
          boutiquePlaylist({cat:this.name,limit:50}).then(res=>{

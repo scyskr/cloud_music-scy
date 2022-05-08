@@ -2,7 +2,7 @@ import axios  from "axios";
 
 //创建一个单例
 const instance=axios.create({
-    baseURL:'http://www.codeman.ink:3000',
+    baseURL:'/api',
     timeout:4000,
     // headers:{'Content-Type': 'application/json'},
     // headers: {'X-Requested-With': 'XMLHttpRequest'},

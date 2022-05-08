@@ -18,7 +18,7 @@
   <el-form-item>
     <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
     <el-button @click="resetForm('ruleForm')">重置</el-button>
-      <el-button  @click="logst">注册</el-button>   <!--  @click="dialogVisible = true" -->
+      <el-button >注册</el-button>   <!--  @click="dialogVisible = true" -->
   </el-form-item>
 </el-form>
 <div  class="login" slot="reference"  v-if="$store.state.loginuser==false">
@@ -34,14 +34,15 @@
   placement="bottom"
   width="200"
   trigger="click"
-
   >   
-  <div  class="logmaxhei"><button @click="logouts">退出登录</button></div>
+  <div  class="logmaxhei"><button @click="logouts">退出登录</button>
+  <button @click="logst">查看登陆状态</button>
+  </div>
        <div slot="reference" class="isLoggedIn" >
          <div >
-      <img :src="$store.state.userid.avatarUrl" alt=""  > 
+      <img :src="userInfo.avatarUrl" alt=""  > 
       </div>
-        <div class="bntlog"> {{$store.state.userid.nickname}}</div>
+        <div class="bntlog"> {{userInfo.nickname}}</div>
     </div>
 </el-popover>
   
@@ -66,7 +67,7 @@
 </template>
 
 <script>
-import {loginskr,loginstatus,logout} from '../../../network/app'
+import {loginskr,loginstatus,logout,useraccount} from '../../../network/app'
 export default {
   components: {  },
    name:'login',
@@ -87,7 +88,8 @@ export default {
         } 
          else {
           callback();
-        }
+        };
+
       };
       return {
         ruleForm: {
@@ -105,7 +107,9 @@ export default {
         },
    dialogVisible: false,
      userLogo:'',
-     username:''
+     username:'',
+      useraccounts:'',
+      userInfo:''
        }
     },
     methods: {
@@ -117,6 +121,11 @@ export default {
             loginskr({phone:this.ruleForm.pass,password:this.ruleForm.checkPass,timestamp:date, withCredentials: true,}).then(res=>{
                 if(res.data.code==200){   
                 console.log(res);
+               window.localStorage.setItem("userId", res.data.profile.userId);
+               window.localStorage.setItem("useracatarurl", res.data.profile.avatarUrl);
+               window.localStorage.setItem("nickname", res.data.profile.nickname);
+                let ekkk=window.localStorage.getItem('userId');
+                    console.log(ekkk,'eeee');
                 //更改vuex的userid
                 this.$store.commit('updatyesuserid',res.data.profile.userId);
                 this.$store.commit('updatauserid',res.data.profile);
@@ -127,7 +136,6 @@ export default {
                type: 'success'
                  });
                 //存到浏览器内存里 比sesionStorage 会话更久 不会自动删除
-                //  window.localStorage.setItem("userId", result.data.profile.userId);
                  // 将userInfo传回父组件
                 //  this.$emit("getUserInfo", res.data.profile);
                  this.userLogo=res.data.profile.avatarUrl;
@@ -166,7 +174,7 @@ export default {
       resetForm(formName) {
         this.$refs[formName].resetFields();
       },
-          handleClose(done) {
+     handleClose(done) {
         this.$confirm('确认关闭？')
           .then(_ => {
             done();
@@ -175,7 +183,6 @@ export default {
       },
       logst(){
         loginstatus({id:1977595259}).then(res=>{
-         
           console.log(res+"登陆状态");
         })
       },
@@ -189,7 +196,41 @@ export default {
           //更改 登陆状态
        this.$store.commit('updataloginuser',false);
         })
-     } 
+     },
+        // 获取当前用户信息
+      getCurrentUserInfo () {
+      var timestamp = Date.parse(new Date());
+      useraccount({timestamp}).then(res=>{
+        this.useraccounts=res.data;
+       if (this.useraccounts.profile != null) {
+        this.userInfo = this.useraccounts.profile;
+        console.log(this.userInfo,'this.userInfo');
+        // 更新登录状态
+        this.$store.commit("updataloginuser", true);
+        // 更新当前用户id
+        // this.$store.commit("updateCurrentUserId", res.data.profile.userId);
+        // 将请求到的用户id存入localstorage
+         window.localStorage.setItem("userId", this.useraccounts.profile.userId);
+      } else {
+        // 未登录
+        this.$store.commit("updataloginuser", false);
+        // 如果localstorage存有userId就清除
+        if (window.localStorage.getItem("userId")) {
+          window.localStorage.removeItem("userId");
+        }
+      }
+      })
+    }, 
+    },
+    created(){
+      this.getCurrentUserInfo();
+        if (document.cookie.search("MUSIC_U=") != -1) {
+      // 如果本地存有cookie，则先暂时判定为已登录，
+      // 以解决登录状态下在视频页等需要登录的页面刷新因为登录状态默认为false，
+      // 需要等待获取用户信息请求结束后更新用户状态才有进入视频页的权限，导致被返回到发现音乐页面，体验很差
+      // 后面获取用户信息将再次确认用户是否登录
+      this.$store.commit("updataLoginState", true);
+    }
     }
    
 }

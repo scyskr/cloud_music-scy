@@ -1,12 +1,16 @@
 <template>
-  <div>
+  <div class="excloudindex">
+      <el-backtop target=".excloudindex"></el-backtop>
     <div class="recommendThePlaylist">
-   <div class="recommendThePlaylistheader" v-if="$store.state.userid==''">请登录的雷达歌单 </div> 
+   <div class="recommendThePlaylistheader" v-if="$store.state.userid==''">请登录再查看你的雷达歌单 </div> 
     <div class="recommendThePlaylistheader" v-else>{{$store.state.userid.nickname}} </div> 
    <div class="bigData">根据你的红心我们会推荐更多好的音乐给你</div>
     <div class="recommendedHome" >
         <div class="recommendedItme" >
-        <div class="iteminfo" v-for="(items,id) in reslut" :key="id"><img :src="items.coverImgUrl" alt=""><span>{{items.name}}</span></div>
+        <div class="iteminfo" v-for="(items,id) in reslut" :key="id"
+        @click="exclumusic(items.id)"
+        >
+          <img :src="items.coverImgUrl" alt=""><span>{{items.name}}</span></div>
         </div>
     </div>
 </div>  
@@ -14,8 +18,12 @@
    <div class="recommendThePlaylistheader">让音乐唤醒你 <i class="icon-arrow-right-bold iconfont "></i></div> 
     <div class="recommendedHome" >
         <div class="recommendedItme" >
-        <div class="iteminfo" v-for="(infos) in exclusives" :key="infos.name"><img  v-lazy="infos.coverImgUrl" alt="">
-        <span>{{infos.name}}</span></div>
+        <div class="iteminfo" v-for="(infos) in exclusives" :key="infos.name"
+        @click="recommendedItmemusci(infos.id)"
+        >
+          <div><img  v-lazy="infos.coverImgUrl" alt=""></div>
+        <div><span>{{infos.name}}</span></div>
+        </div>
         </div>
        
     </div>
@@ -33,7 +41,16 @@ export default {
         banners:[{}],
         exclusives:[{}]
     }
-  }, //mounted 
+  }, 
+  methods:{
+   exclumusic(id){
+      this.$router.push('/home/playlist/'+id); 
+   },
+   recommendedItmemusci(id){
+       this.$router.push('/home/playlist/'+id); 
+   }
+  },
+  //mounted 
   created(){
           api({limit:5}).then(res=>{
             const reslutdata=res.data;
@@ -48,6 +65,32 @@ export default {
 </script>
 
 <style>
+.excloudindex::-webkit-scrollbar
+{
+    width: 5px;
+    height: 5px;
+    border-radius: 10px;
+    background-color: #ccc;
+}
+/*定义滚动条轨道 内阴影+圆角*/
+.excloudindex::-webkit-scrollbar-track
+{
+   box-shadow: inset 0 0 6px rgba(241, 240, 240, 0.3);
+    border-radius: 10px;
+    background-color: #ffff;
+}
+/*定义滑块 内阴影+圆角*/
+.excloudindex::-webkit-scrollbar-thumb
+{
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(249, 248, 248, 0.3);
+    background-color: #ccc;
+    border-radius: 10px;
+}
+.excloudindex{
+  overflow-y: scroll;
+  height: 800px;
+}
  .recommendThePlaylistheader{
      color: black;
         font-weight: 850;
@@ -61,7 +104,7 @@ export default {
     row-gap: 24px;
  } 
   .iteminfo img{
-    width: 220px;
+    width: 200px;
  }
  .bigData{
      color: #ccc;

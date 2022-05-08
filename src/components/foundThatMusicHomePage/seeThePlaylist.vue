@@ -1,5 +1,7 @@
 <template>
+
     <div class="musicListIndex">
+        <el-backtop target=".musicListIndex"></el-backtop>
     <!-- 精选歌单入口展示 -->
     <div class="highqualityEntry">
       <img
@@ -22,7 +24,15 @@
         </mcf>
      </div>
       <!-- 推荐歌单 -->
-      <boutique :name="mcbot" :key="timer" ></boutique>
+      <boutique :name="mcbot" :key="timer" :currpage="currentPage" ></boutique>
+      <div class="undergroundPaging">
+        <el-pagination
+  background
+  layout="prev, pager, next"
+  :total="1000"
+  @current-change="clicks">
+</el-pagination>
+      </div>
     </div>
 </template>
 
@@ -39,10 +49,14 @@ export default {
            mcfnames:'',
            mcbot:'华语',
             timer: '',
+            currentPage:0,
          
        }
    },
    methods:{
+     clicks(arr){
+      this.currentPage=arr;
+     },
        getTheFirstOfHighquality(){
            
        },
@@ -72,6 +86,32 @@ export default {
 </script>
 
 <style>
+.musicListIndex::-webkit-scrollbar
+{
+    width: 5px;
+    height: 5px;
+    border-radius: 10px;
+    background-color: #ffff;
+}
+/*定义滚动条轨道 内阴影+圆角*/
+.musicListIndex::-webkit-scrollbar-track
+{
+   box-shadow: inset 0 0 6px rgba(241, 240, 240, 0.3);
+    border-radius: 10px;
+    background-color: #ffff;
+}
+/*定义滑块 内阴影+圆角*/
+.musicListIndex::-webkit-scrollbar-thumb
+{
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(249, 248, 248, 0.3);
+    background-color: #ccc;
+    border-radius: 10px;
+}
+.musicListIndex{
+     overflow-y: scroll;
+    height: 800px;
+}
 .highqualityEntry {
   position: relative;
   width: 100%;
@@ -125,5 +165,8 @@ export default {
   /* 字体直接写小于12没有效果 */
   font-size: 12px;
   transform: scale(0.9, 0.9);
+}
+.undergroundPaging{
+  padding-bottom: 100px;
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="recommendedHome" >
         <div class="boutitme" >
         <div class="iteminfo" v-for="(globalPlaylistitem,id) in globalPlaylist" 
-        :key="id"><img v-lazy="globalPlaylistitem.coverImgUrl" alt="">
+        :key="id" @click="globalPlaylistkiss(globalPlaylistitem.id)"><img v-lazy="globalPlaylistitem.coverImgUrl" alt="">
         <span>{{globalPlaylistitem.name}}</span></div>
         </div>
     </div>
@@ -20,6 +20,11 @@ export default {
    globalPlaylist:[],
     // sss:$store.state.loginuser
       }
+  },
+  methods:{
+    globalPlaylistkiss(id){
+         this.$router.push('/home/playlist/'+id); 
+    }
   },
   created(){
        toplistall().then(res=>{
@@ -42,7 +47,7 @@ export default {
  } 
 
  .iteminfo img{
-    width: 220px;
+    width: 210px;
     border-radius: 10px;
  }
 </style>

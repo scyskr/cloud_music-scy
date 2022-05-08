@@ -102,7 +102,7 @@ export default {
   color: #F56C6C;
 }
 .macfmaxhei{
-  max-height: 400px;
+  max-height: 340px;
   overflow: hidden;
   overflow-y: scroll;
 }
